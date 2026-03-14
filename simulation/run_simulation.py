@@ -14,14 +14,15 @@ def run():
 
     with open("traffic_data.csv", "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["step", "vehicles", "avg_speed"])
+        writer.writerow(["step", "vehicles", "avg_speed", "congestion"])
 
         while step < 1000:
             traci.simulationStep()
 
             vehicles = traci.vehicle.getIDList()
-            speeds = []
+            vehicle_count = len(vehicles)
 
+            speeds = []
             for vid in vehicles:
                 speed = traci.vehicle.getSpeed(vid)
                 speeds.append(speed)
@@ -31,9 +32,18 @@ def run():
             else:
                 avg_speed = 0
 
-            # quick congestion check
-            if avg_speed < 5 and len(vehicles) > 0:
-                print("⚠ Congestion detected!")
+            # smoothing buffer for stable congestion detection
+            smooth_buffer.append(avg_speed)
+            if len(smooth_buffer) > 5:
+                smooth_buffer.pop(0)
+
+            smoothed_speed = sum(smooth_buffer) / len(smooth_buffer)
+
+            # improved congestion logic (after warmup)
+            congestion = 0
+            if step > 50 and smoothed_speed < 5 and vehicle_count > 10:
+                congestion = 1
+                print("⚠ Persistent congestion detected!")
 
                 tls_ids = traci.trafficlight.getIDList()
                 for tls in tls_ids:
@@ -41,36 +51,26 @@ def run():
 
             # store history for graphs
             speed_history.append(avg_speed)
-            vehicle_history.append(len(vehicles))
+            vehicle_history.append(vehicle_count)
 
-            # smoothing buffer
-            smooth_buffer.append(avg_speed)
-            if len(smooth_buffer) > 5:
-                smooth_buffer.pop(0)
-
-            smoothed_speed = sum(smooth_buffer) / len(smooth_buffer)
-
-            if smoothed_speed < 5 and len(vehicles) > 0:
-                print("⚠ Persistent congestion detected!")
-
-            # skip first 50 steps (startup phase)
+            # save dataset after warmup
             if step > 50:
-                writer.writerow([step, len(vehicles), avg_speed])
+                writer.writerow([step, vehicle_count, avg_speed, congestion])
 
-            print(f"Step {step} | Vehicles: {len(vehicles)} | Avg Speed: {avg_speed:.2f}")
+            print(f"Step {step} | Vehicles: {vehicle_count} | Avg Speed: {avg_speed:.2f}")
 
             step += 1
 
     traci.close()
 
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(10,5))
 
-    plt.subplot(2, 1, 1)
+    plt.subplot(2,1,1)
     plt.plot(vehicle_history)
     plt.title("Vehicle Count Over Time")
     plt.ylabel("Vehicles")
 
-    plt.subplot(2, 1, 2)
+    plt.subplot(2,1,2)
     plt.plot(speed_history)
     plt.title("Average Speed Over Time")
     plt.xlabel("Simulation Step")
