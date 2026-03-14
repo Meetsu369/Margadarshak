@@ -16,7 +16,7 @@ def run():
         writer = csv.writer(file)
         writer.writerow(["step", "vehicles", "avg_speed"])
 
-        while step < 100:
+        while step < 1000:
             traci.simulationStep()
 
             vehicles = traci.vehicle.getIDList()
