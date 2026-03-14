@@ -39,24 +39,23 @@ def run():
                 for tls in tls_ids:
                     traci.trafficlight.setPhase(tls, 0)
 
-            # store full history for graph
+            # store history for graphs
             speed_history.append(avg_speed)
+            vehicle_history.append(len(vehicles))
 
-            # smoothing buffer for congestion detection
+            # smoothing buffer
             smooth_buffer.append(avg_speed)
-
             if len(smooth_buffer) > 5:
                 smooth_buffer.pop(0)
 
             smoothed_speed = sum(smooth_buffer) / len(smooth_buffer)
 
-            # persistent congestion detection
             if smoothed_speed < 5 and len(vehicles) > 0:
                 print("⚠ Persistent congestion detected!")
 
-            vehicle_history.append(len(vehicles))
-
-            writer.writerow([step, len(vehicles), avg_speed])
+            # skip first 50 steps (startup phase)
+            if step > 50:
+                writer.writerow([step, len(vehicles), avg_speed])
 
             print(f"Step {step} | Vehicles: {len(vehicles)} | Avg Speed: {avg_speed:.2f}")
 
@@ -79,6 +78,7 @@ def run():
 
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == "__main__":
     run()
