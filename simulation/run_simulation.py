@@ -16,7 +16,7 @@ def run():
         writer = csv.writer(file)
         writer.writerow(["step", "vehicles", "avg_speed", "congestion"])
 
-        while step < 1000:
+        while step < 2000:
             traci.simulationStep()
 
             vehicles = traci.vehicle.getIDList()
@@ -39,12 +39,13 @@ def run():
 
             smoothed_speed = sum(smooth_buffer) / len(smooth_buffer)
 
-            # improved congestion logic (after warmup)
+            # Improved congestion logic (aligned with previous blocks)
             congestion = 0
-            if step > 50 and smoothed_speed < 6 and vehicle_count > 12:
+            if step > 50 and smoothed_speed < 6.8 and vehicle_count > 13:
                 congestion = 1
                 print("⚠ Persistent congestion detected!")
 
+                # change traffic signal to clear queue
                 tls_ids = traci.trafficlight.getIDList()
                 for tls in tls_ids:
                     traci.trafficlight.setPhase(tls, 0)
@@ -78,7 +79,6 @@ def run():
 
     plt.tight_layout()
     plt.show()
-
 
 if __name__ == "__main__":
     run()
