@@ -10,6 +10,7 @@ def run():
     step = 0
     speed_history = []
     vehicle_history = []
+    smooth_buffer = []
 
     with open("traffic_data.csv", "w", newline="") as file:
         writer = csv.writer(file)
@@ -38,14 +39,16 @@ def run():
                 for tls in tls_ids:
                     traci.trafficlight.setPhase(tls, 0)
 
-            # store speed history
+            # store full history for graph
             speed_history.append(avg_speed)
 
-            # keep only last 5 speeds
-            if len(speed_history) > 5:
-                speed_history.pop(0)
+            # smoothing buffer for congestion detection
+            smooth_buffer.append(avg_speed)
 
-            smoothed_speed = sum(speed_history) / len(speed_history)
+            if len(smooth_buffer) > 5:
+                smooth_buffer.pop(0)
+
+            smoothed_speed = sum(smooth_buffer) / len(smooth_buffer)
 
             # persistent congestion detection
             if smoothed_speed < 5 and len(vehicles) > 0:
@@ -61,12 +64,21 @@ def run():
 
     traci.close()
 
-    plt.plot(vehicle_history)
-    plt.xlabel("Simulation Step")
-    plt.ylabel("Number of Vehicles")
-    plt.title("Vehicle Count Over Time")
-    plt.show()
+    plt.figure(figsize=(10, 5))
 
+    plt.subplot(2, 1, 1)
+    plt.plot(vehicle_history)
+    plt.title("Vehicle Count Over Time")
+    plt.ylabel("Vehicles")
+
+    plt.subplot(2, 1, 2)
+    plt.plot(speed_history)
+    plt.title("Average Speed Over Time")
+    plt.xlabel("Simulation Step")
+    plt.ylabel("Speed (m/s)")
+
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     run()
