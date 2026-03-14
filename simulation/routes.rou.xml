@@ -4,6 +4,6 @@
 
     <route id="route0" edges="road1"/>
 
-    <flow id="traffic" type="car" route="route0" begin="0" end="1000" vehsPerHour="3000"/>
+    <flow id="traffic" type="car" route="route0" begin="0" end="1000" vehsPerHour="4000"/>
 
 </routes>
