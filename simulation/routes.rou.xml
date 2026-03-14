@@ -1,9 +1,19 @@
 <routes>
 
-    <vType id="car" accel="1.5" decel="4.5" sigma="0.7" length="5" maxSpeed="8"/>
+    <vType id="car"
+           accel="1.5"
+           decel="4.5"
+           sigma="0.7"
+           length="5"
+           maxSpeed="8"/>
 
-    <route id="route0" edges="road1"/>
+    <route id="route0" edges="road1 road2"/>
 
-    <flow id="traffic" type="car" route="route0" begin="0" end="1000" vehsPerHour="4000"/>
+    <flow id="traffic"
+          type="car"
+          route="route0"
+          begin="0"
+          end="1000"
+          vehsPerHour="4000"/>
 
 </routes>

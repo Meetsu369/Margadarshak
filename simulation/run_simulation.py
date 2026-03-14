@@ -41,7 +41,7 @@ def run():
 
             # improved congestion logic (after warmup)
             congestion = 0
-            if step > 50 and smoothed_speed < 5 and vehicle_count > 10:
+            if step > 50 and smoothed_speed < 6 and vehicle_count > 12:
                 congestion = 1
                 print("⚠ Persistent congestion detected!")
 

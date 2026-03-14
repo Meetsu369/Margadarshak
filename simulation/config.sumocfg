@@ -1,5 +1,4 @@
 <configuration>
-
     <input>
         <net-file value="network.net.xml"/>
         <route-files value="routes.rou.xml"/>
@@ -7,7 +6,6 @@
 
     <time>
         <begin value="0"/>
-        <end value="200"/>
+        <end value="1000"/>
     </time>
-
 </configuration>
